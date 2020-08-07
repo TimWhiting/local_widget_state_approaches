@@ -1,5 +1,6 @@
 
 ![Flutter Web](https://github.com/TimWhiting/local_widget_state_approaches/workflows/Flutter%20Web/badge.svg)
+Demo Link: https://timwhiting.github.io/local_widget_state_approaches/#/
 # Widget UI State Logic encaspulation approaches
 This project intends to illustrate via several case studies what is difficult when reusing state logic. (Not state) among multiple stateful widgets.
 
