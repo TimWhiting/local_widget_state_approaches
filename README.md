@@ -32,6 +32,8 @@ Instead they should be small examples that illustrate a point in reusability of 
 
 (TODO: determine scope and what would make an illustrative examples)
 * Setup 404 unimplemented page
+* Better navigation
+* Highlight navigation for unimplemented pages in a different color
 * Animation heavy page 
 * Form page
 * Use some of Remi's potential examples: https://github.com/flutter/flutter/issues/51752#issuecomment-669626522
