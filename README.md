@@ -1,16 +1,18 @@
 # local_widget_state_approaches
+This project intends to illustrate via several case studies what is difficult when reusing state logic. (Not state) among multiple stateful widgets.
 
-A new Flutter project.
+## Getting access
+Please request access and respect the other contributors. Make sure you resolve merge conflicts properly, and keep the repository organized. Otherwise, just fork and submit pull request like usual open-source practice. (I'm not sure how many people are wanting to contribute).
 
-## Getting Started
+## Current Progress
+* Counter App
+ - Hooks: Done
+ - Stateful: Done
+ - LateProperty: Not Started
+ - Builders: ? 
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Future Work
+(TODO: determine scope and what would make an illustrative examples)
+* Animation heavy page 
+* Form page
+* Use some of Remi's potential examples: https://github.com/flutter/flutter/issues/51752#issuecomment-669626522
