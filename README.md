@@ -27,7 +27,7 @@ Please request access and respect the other contributors. Make sure you resolve 
   * Builders: Not Started
 
 ## Future Work
-I intend to keep the examples small like Remi suggests, they should not be full blown apps. 
+I intend to keep the examples small like Remi suggests, they should not be full blown apps unless absolutely needed. 
 
 Instead they should be small examples that illustrate a point in reusability of state logics.
 
@@ -39,3 +39,4 @@ Instead they should be small examples that illustrate a point in reusability of 
 * Form page
 * Use some of Remi's potential examples: https://github.com/flutter/flutter/issues/51752#issuecomment-669626522
 * Also this: https://github.com/flutter/flutter/issues/51752#issuecomment-670263627
+* Would love to see the code along with the app like flutter gallery's code samples.
