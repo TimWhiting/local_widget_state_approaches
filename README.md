@@ -11,14 +11,19 @@ Please request access and respect the other contributors. Make sure you resolve 
 * LateProperty - Adds registration of callbacks via mixin see this: https://github.com/flutter/flutter/issues/51752#issuecomment-667737471
 * Hooks - Using `flutter_hooks` package
 
-### Apps
-* Counter App
+### Examples
+
+* Counter Example
   * Hooks: Done
   * Stateful: Done
   * LateProperty: Not Started
   * Builders: Not Started
 
 ## Future Work
+I intend to keep the examples small like Remi suggests, they should not be full blown apps. 
+
+Instead they should be small examples that illuustrate a point in reusability of state logics.
+
 (TODO: determine scope and what would make an illustrative examples)
 * Animation heavy page 
 * Form page
