@@ -1,6 +1,9 @@
 # Widget UI State Logic encaspulation approaches
 This project intends to illustrate via several case studies what is difficult when reusing state logic. (Not state) among multiple stateful widgets.
 
+Note that I'm doing this in my spare time, and therefore I can not gurantee timeliness as far as incorporating all different approaches for all examples.
+
+Also, I'm not sure the best name for the respository, so I did my best. I think the Header of the readme might be more instructive as to what these examples will try to demonstrate. Open an issue if you'd like to discuss that. Or we can create a Wiki page about that.
 ## Getting access
 Please request access and respect the other contributors. Make sure you resolve merge conflicts properly, and keep the repository organized. Otherwise, just fork and submit pull request like usual open-source practice. (I'm not sure how many people are wanting to contribute).
 
