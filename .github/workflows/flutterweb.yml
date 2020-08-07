@@ -2,32 +2,33 @@ name: Flutter Web
 on: [push]
 jobs:
   build:
-runs-on: ubuntu-latest
+    name: FlutterWeb
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '12.x'
-    - uses: subosito/flutter-action@v1
-      with:
-        flutter-version: '1.20.x' # you can use 1.12
-        channel: 'dev' # Currently you have to use beta channel for Flutter web.
-    - name: Upgrades flutter
-      run: flutter upgrade
-    - name: Enable Web
-      run: flutter config --enable-web
-    - name: Install dependencies
-      run: flutter packages get
-    - name: Build Web
-      run: flutter build web
-    - name: Deploy
-      run: |
-        cd build/web
-        git init
-        git config user.name  "CI"
-        git config user.email "flutter-ci@github.com"
-        git remote add secure-origin https://${{ secrets.ACCESS_TOKEN }}@github.com/TimWhiting/local_widget_state_approaches.git
-        git checkout -b gh-pages
-        git add .
-        git commit -m "Updated site"
-        git push --force secure-origin gh-pages
+      - uses: actions/checkout@v1
+      - uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+      - uses: subosito/flutter-action@v1
+        with:
+          flutter-version: '1.20.x' # you can use 1.12
+          channel: 'dev' # Currently you have to use beta channel for Flutter web.
+      - name: Upgrades flutter
+        run: flutter upgrade
+      - name: Enable Web
+        run: flutter config --enable-web
+      - name: Install dependencies
+        run: flutter packages get
+      - name: Build Web
+        run: flutter build web
+      - name: Deploy
+        run: |
+          cd build/web
+          git init
+          git config user.name  "CI"
+          git config user.email "flutter-ci@github.com"
+          git remote add secure-origin https://${{ secrets.ACCESS_TOKEN }}@github.com/TimWhiting/local_widget_state_approaches.git
+          git checkout -b gh-pages
+          git add .
+          git commit -m "Updated site"
+          git push --force secure-origin gh-pages
