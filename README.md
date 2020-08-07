@@ -1,4 +1,4 @@
-# local_widget_state_approaches
+# Widget UI State Logic encaspulation approaches
 This project intends to illustrate via several case studies what is difficult when reusing state logic. (Not state) among multiple stateful widgets.
 
 ## Getting access
