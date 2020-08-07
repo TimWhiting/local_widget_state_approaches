@@ -17,6 +17,8 @@ Please request access and respect the other contributors. Make sure you resolve 
 * Builders - Nothing to add
 * LateProperty - Adds registration of callbacks via mixin see this: https://github.com/flutter/flutter/issues/51752#issuecomment-667737471
 * Hooks - Using `flutter_hooks` package
+* State Restoration Framework
+  * This was mentioned at one point in the issue, because flutter now has a state restoration framework. I don't know if it can work, but I'm willing to try for at least a few of the things that we are trying to solve here.
 
 ### Examples
 
