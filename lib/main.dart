@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:local_widget_state_approaches/hooks/counter.dart';
-import 'package:local_widget_state_approaches/stateful/counter.dart';
+
+import 'hooks/counter.dart' show CounterHooks;
+// import 'lateProperty/counter.dart' show LatePropertyCounter; // empty
+import 'stateful/counter.dart' show StatefulCounter;
+
+import 'stateful/animation.dart' show StatefulAnimation;
 
 void main() {
   runApp(MyApp());
@@ -22,11 +26,41 @@ class MyApp extends StatelessWidget {
   }
 }
 
+enum Approach { hooks, stateful, lateProperty }
+
+enum Examples { counter, animation }
+
 class HomePage extends HookWidget {
+  Widget pageFor({ Approach approach, Examples example }) {
+    switch (example) {
+      case Examples.counter:
+        switch (approach) {
+          case Approach.hooks:
+            return CounterHooks('Hook Counter');
+          case Approach.stateful:
+            return StatefulCounter(title: 'Stateful Counter');
+          case Approach.lateProperty:
+            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+        }
+        break;
+      case Examples.animation:
+        switch (approach) {
+          case Approach.hooks:
+            return Text('unavailable');
+          case Approach.stateful:
+            return StatefulAnimation();
+          case Approach.lateProperty:
+            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+        }
+        break;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final approach = useState(Approach.Hooks);
-    final example = useState(Examples.Counter);
+    final approach = useState(Approach.hooks);
+    final example = useState(Examples.counter);
     return Row(
       children: [
         NavigationRail(
@@ -51,29 +85,8 @@ class HomePage extends HookWidget {
           onDestinationSelected: (i) => approach.value = Approach.values[i],
           labelType: NavigationRailLabelType.all,
         ),
-        Expanded(child: example.value.pageFor(approach.value)),
+        Expanded(child: pageFor(approach: approach.value, example: example.value)),
       ],
     );
-  }
-}
-
-enum Approach { Hooks, Stateful, LateProperty }
-
-enum Examples { Counter, SomethingElse }
-
-extension on Examples {
-  Widget pageFor(Approach approach) {
-    switch (this) {
-      case Examples.Counter:
-        switch (approach) {
-          case Approach.Hooks:
-            return CounterHooks('Hook Counter');
-          case Approach.Stateful:
-            return StatefulCounter(title: 'Stateful Counter');
-          default:
-            return StatefulCounter(title: 'Stateful Counter');
-        }
-    }
-    return CounterHooks('Hook Counter Default');
   }
 }
