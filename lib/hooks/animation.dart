@@ -4,10 +4,18 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+bool useAreAnimationsEnabled() {
+  final context = useContext();
+  return !MediaQuery.of(context).disableAnimations && TickerMode.of(context);
+}
+
 Color _useBackgroundColor(Duration duration) {
   final colorState = useState(Colors.green[100]);
+  final animationsEnabled = useAreAnimationsEnabled();
 
   useEffect(() {
+    if (!animationsEnabled) return null;
+
     int color = 100;
     final timer = Timer.periodic(duration, (Timer timer) {
       color += 100;
@@ -16,16 +24,22 @@ Color _useBackgroundColor(Duration duration) {
     });
 
     return timer.cancel;
-  }, [duration]);
+  }, [duration, animationsEnabled]);
 
   return colorState.value;
 }
 
 class HookAnimation extends HookWidget {
+  HookAnimation({
+    Key key,
+    this.period = const Duration(milliseconds: 900),
+  }) : super(key: key);
+
+  final Duration period;
+
   @override
   Widget build(BuildContext context) {
-    // Supports hot-reload. Changing the duration will be applied live
-    final color = _useBackgroundColor(const Duration(milliseconds: 900));
+    final color = _useBackgroundColor(period);
 
     return Example(
       color: color,
@@ -53,7 +67,7 @@ class Example extends HookWidget {
     // The hook internally handles the duration change by default
     final controller = useAnimationController(duration: duration.value);
 
-    // Both handles `active` being toggle and forcing the `controller` to
+    // Both handles `active` being toggled and forcing the `controller` to
     // refresh the animation when `duration` changes
     useEffect(() {
       if (active) {
