@@ -4,16 +4,21 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../common.dart';
+
 class StatefulAnimation extends StatefulWidget {
   StatefulAnimation({
     Key key,
+    this.period = const Duration(milliseconds: 900),
   }): super(key: key);
+
+  final Duration period;
 
   @override
   _StatefulAnimationState createState() => _StatefulAnimationState();
 }
 
-class _StatefulAnimationState extends State<StatefulAnimation> {
+class _StatefulAnimationState extends State<StatefulAnimation> with ShowAnimationsMixin {
   ValueNotifier<Color> _colorListenable;
   Timer _timer;
 
@@ -21,18 +26,43 @@ class _StatefulAnimationState extends State<StatefulAnimation> {
   void initState() {
     super.initState();
     _colorListenable = ValueNotifier<Color>(Colors.green[100]);
-    int color = 100;
-    _timer = Timer.periodic(const Duration(milliseconds: 900), (Timer timer) {
-      color += 100;
-      if (color > 900)
-        color = 100;
-      _colorListenable.value = Colors.green[color];
-    });
+  }
+
+  int _color = 100;
+
+  void _ticker(Timer timer) {
+    _color += 100;
+    if (_color > 900)
+      _color = 100;
+    _colorListenable.value = Colors.green[_color];
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (TickerMode.of(context) && showAnimations) {
+      _timer ??= Timer.periodic(widget.period, _ticker);
+    } else {
+      _timer?.cancel();
+      _timer = null;
+    }
+  }
+
+  @override
+  void didUpdateWidget(StatefulAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.period != oldWidget.period) {
+      if (TickerMode.of(context) && showAnimations) {
+        _timer.cancel();
+        _timer = Timer.periodic(widget.period, _ticker);
+      }
+    }
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _timer?.cancel();
+    _colorListenable.dispose();
     super.dispose();
   }
 
@@ -67,7 +97,7 @@ class Example extends StatefulWidget {
   _ExampleState createState() => _ExampleState();
 }
 
-class _ExampleState extends State<Example> with TickerProviderStateMixin, RestorationMixin {
+class _ExampleState extends State<Example> with TickerProviderStateMixin, RestorationMixin, ShowAnimationsMixin {
   RestorableDuration _duration = RestorableDuration(const Duration(seconds: 5));
   AnimationController _animation;
   Color _color;
@@ -87,8 +117,8 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
     if (_firstTime)
       _animation = AnimationController(vsync: this);
     _animation.duration = _duration.value;
-    if (_firstTime && widget.active)
-      _animation.repeat();
+    if (_firstTime)
+      _setupAnimation();
     _firstTime = false;
   }
 
@@ -100,13 +130,8 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
     super.didUpdateWidget(oldWidget);
     oldWidget.color.removeListener(_colorChange);
     widget.color.addListener(_colorChange);
-    if (widget.active != oldWidget.active) {
-      if (widget.active) {
-        _animation.repeat();
-      } else {
-        _animation.stop();
-      }
-    }
+    if (widget.active != oldWidget.active)
+      _setupAnimation();
   }
 
   double _height;
@@ -115,6 +140,16 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
   void didChangeDependencies() {
     super.didChangeDependencies();
     _height = _expensiveComputation(MediaQuery.of(context).size.height);
+    _setupAnimation();
+  }
+
+  void _setupAnimation() {
+    bool shouldAnimate = widget.active && showAnimations;
+    if (shouldAnimate && !_animation.isAnimating) {
+      _animation.repeat();
+    } else if (!shouldAnimate && _animation.isAnimating) {
+      _animation.stop();
+    }
   }
 
   double _expensiveComputation(double input) {
@@ -131,7 +166,7 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
   void _updateDuration(Duration newDuration) {
     _duration.value = newDuration;
     _animation.duration = _duration.value;
-    if (widget.active)
+    if (_animation.isAnimating)
       _animation.repeat();
   }
 
