@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:local_widget_state_approaches/hooks/animation.dart';
 
 import 'hooks/counter.dart' show CounterHooks;
 // import 'lateProperty/counter.dart' show LatePropertyCounter; // empty
@@ -46,7 +47,7 @@ class HomePage extends HookWidget {
       case Examples.animation:
         switch (approach) {
           case Approach.hooks:
-            return Text('unavailable');
+            return HookAnimation();
           case Approach.stateful:
             return StatefulAnimation();
           case Approach.lateProperty:
