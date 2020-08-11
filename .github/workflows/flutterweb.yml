@@ -12,7 +12,7 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: "1.21.x" # you can use 1.12
-          channel: "master" # Currently you have to use beta channel for Flutter web.
+          channel: "dev" # Currently you have to use beta channel for Flutter web.
       - name: Upgrades flutter
         run: flutter upgrade
       - name: Enable Web
