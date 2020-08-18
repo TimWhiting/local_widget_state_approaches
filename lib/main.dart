@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:local_widget_state_approaches/hooks/animated_counter.dart';
 import 'package:local_widget_state_approaches/hooks/animation.dart';
+import 'package:local_widget_state_approaches/stateful/animated_counter.dart';
 
 import 'hooks/counter.dart' show CounterHooks;
 // import 'lateProperty/counter.dart' show LatePropertyCounter; // empty
@@ -29,10 +31,10 @@ class MyApp extends StatelessWidget {
 
 enum Approach { hooks, stateful, lateProperty }
 
-enum Examples { counter, animation }
+enum Examples { counter, animation, animatedCouter }
 
 class HomePage extends HookWidget {
-  Widget pageFor({ Approach approach, Examples example }) {
+  Widget pageFor({Approach approach, Examples example}) {
     switch (example) {
       case Examples.counter:
         switch (approach) {
@@ -40,6 +42,16 @@ class HomePage extends HookWidget {
             return CounterHooks('Hook Counter');
           case Approach.stateful:
             return StatefulCounter(title: 'Stateful Counter');
+          case Approach.lateProperty:
+            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+        }
+        break;
+      case Examples.animatedCouter:
+        switch (approach) {
+          case Approach.hooks:
+            return HookAnimatedCounter();
+          case Approach.stateful:
+            return StatefulAnimatedCounter();
           case Approach.lateProperty:
             return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
         }

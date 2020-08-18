@@ -82,7 +82,7 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
   bool _firstTime = true;
 
   @override
-  void restoreState(RestorationBucket oldBucket) {
+  void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(_duration, 'duration');
     if (_firstTime)
       _animation = AnimationController(vsync: this);
