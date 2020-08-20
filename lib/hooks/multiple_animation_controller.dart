@@ -46,7 +46,7 @@ class Box extends HookWidget {
     final position = useAnimatedDouble(
       target + (index * (100 + 10)),
       duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutBack,
+      curve: isDown ? Curves.easeOutBack : Curves.easeOutBack.flipped,
     );
 
     final child = useMemoized(() {
