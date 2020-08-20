@@ -8,6 +8,12 @@ class HookMultipleAnimationController extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final isDown = useState(false);
+    final targets = useState<List<double>>([100, 200, 300]);
+
+    useEffect(() {
+      targets.value = isDown.value ? [100, 200, 300] : [0, 0, 0];
+    }, [isDown.value]);
+
     return MaterialApp(
       home: SafeArea(
         child: Scaffold(
@@ -19,7 +25,7 @@ class HookMultipleAnimationController extends HookWidget {
               3,
               (int index) => Box(
                 index: index,
-                isDown: isDown.value,
+                target: targets.value.elementAt(index),
               ),
             ),
           ),
@@ -33,20 +39,18 @@ class Box extends HookWidget {
   const Box({
     Key key,
     this.index,
-    this.isDown,
+    this.target,
   }) : super(key: key);
 
-  final bool isDown;
+  final double target;
   final int index;
 
   @override
   Widget build(BuildContext context) {
-    final target = isDown ? 300.0 : .0;
-
     final position = useAnimatedDouble(
       target + (index * (100 + 10)),
       duration: const Duration(milliseconds: 500),
-      curve: isDown ? Curves.easeOutBack : Curves.easeOutBack.flipped,
+      curve: Curves.easeOutBack,
     );
 
     final child = useMemoized(() {
