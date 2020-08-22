@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:local_widget_state_approaches/hooks/animated_counter.dart';
 import 'package:local_widget_state_approaches/hooks/animation.dart';
+import 'package:local_widget_state_approaches/hooks/multiple_animation_controller.dart';
 import 'package:local_widget_state_approaches/stateful/animated_counter.dart';
+import 'package:local_widget_state_approaches/stateful/multiple_animation_controller.dart';
 
 import 'hooks/counter.dart' show CounterHooks;
 // import 'lateProperty/counter.dart' show LatePropertyCounter; // empty
@@ -31,7 +33,12 @@ class MyApp extends StatelessWidget {
 
 enum Approach { hooks, stateful, lateProperty }
 
-enum Examples { counter, animation, animatedCouter }
+enum Examples {
+  counter,
+  animation,
+  animatedCouter,
+  multipleAnimationController,
+}
 
 class HomePage extends HookWidget {
   Widget pageFor({Approach approach, Examples example}) {
@@ -52,6 +59,16 @@ class HomePage extends HookWidget {
             return HookAnimatedCounter();
           case Approach.stateful:
             return StatefulAnimatedCounter();
+          case Approach.lateProperty:
+            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+        }
+        break;
+      case Examples.multipleAnimationController:
+        switch (approach) {
+          case Approach.hooks:
+            return HookMultipleAnimationController();
+          case Approach.stateful:
+            return StatefulMultipleAnimationController();
           case Approach.lateProperty:
             return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
         }
