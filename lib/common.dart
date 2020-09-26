@@ -9,6 +9,7 @@ mixin ShowAnimationsMixin<T extends StatefulWidget> on State<T> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    print('here');
     _showAnimations = !MediaQuery.of(context).disableAnimations;
   }
 }

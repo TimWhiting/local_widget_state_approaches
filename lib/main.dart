@@ -1,3 +1,4 @@
+import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:local_widget_state_approaches/hooks/animated_counter.dart';
@@ -50,7 +51,8 @@ class HomePage extends HookWidget {
           case Approach.stateful:
             return StatefulCounter(title: 'Stateful Counter');
           case Approach.lateProperty:
-            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+            return Text(
+                'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
         }
         break;
       case Examples.animatedCouter:
@@ -60,7 +62,8 @@ class HomePage extends HookWidget {
           case Approach.stateful:
             return StatefulAnimatedCounter();
           case Approach.lateProperty:
-            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+            return Text(
+                'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
         }
         break;
       case Examples.multipleAnimationController:
@@ -70,7 +73,8 @@ class HomePage extends HookWidget {
           case Approach.stateful:
             return StatefulMultipleAnimationController();
           case Approach.lateProperty:
-            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+            return Text(
+                'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
         }
         break;
       case Examples.animation:
@@ -80,7 +84,8 @@ class HomePage extends HookWidget {
           case Approach.stateful:
             return StatefulAnimation();
           case Approach.lateProperty:
-            return Text('unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+            return Text(
+                'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
         }
         break;
     }
@@ -115,7 +120,8 @@ class HomePage extends HookWidget {
           onDestinationSelected: (i) => approach.value = Approach.values[i],
           labelType: NavigationRailLabelType.all,
         ),
-        Expanded(child: pageFor(approach: approach.value, example: example.value)),
+        Expanded(
+            child: pageFor(approach: approach.value, example: example.value)),
       ],
     );
   }

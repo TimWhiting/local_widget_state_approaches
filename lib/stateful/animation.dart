@@ -10,7 +10,7 @@ class StatefulAnimation extends StatefulWidget {
   StatefulAnimation({
     Key key,
     this.period = const Duration(milliseconds: 900),
-  }): super(key: key);
+  }) : super(key: key);
 
   final Duration period;
 
@@ -18,7 +18,8 @@ class StatefulAnimation extends StatefulWidget {
   _StatefulAnimationState createState() => _StatefulAnimationState();
 }
 
-class _StatefulAnimationState extends State<StatefulAnimation> with ShowAnimationsMixin {
+class _StatefulAnimationState extends State<StatefulAnimation>
+    with ShowAnimationsMixin {
   ValueNotifier<Color> _colorListenable;
   Timer _timer;
 
@@ -32,13 +33,13 @@ class _StatefulAnimationState extends State<StatefulAnimation> with ShowAnimatio
 
   void _ticker(Timer timer) {
     _color += 100;
-    if (_color > 900)
-      _color = 100;
+    if (_color > 900) _color = 100;
     _colorListenable.value = Colors.green[_color];
   }
 
   @override
   void didChangeDependencies() {
+    print('here');
     super.didChangeDependencies();
     if (TickerMode.of(context) && showAnimations) {
       _timer ??= Timer.periodic(widget.period, _ticker);
@@ -82,10 +83,10 @@ class Example extends StatefulWidget {
     @required this.restorationId,
     this.color,
     this.active,
-  }): assert(restorationId != null),
-      assert(color != null),
-      assert(active != null),
-      super(key: key);
+  })  : assert(restorationId != null),
+        assert(color != null),
+        assert(active != null),
+        super(key: key);
 
   final String restorationId;
 
@@ -97,7 +98,8 @@ class Example extends StatefulWidget {
   _ExampleState createState() => _ExampleState();
 }
 
-class _ExampleState extends State<Example> with TickerProviderStateMixin, RestorationMixin, ShowAnimationsMixin {
+class _ExampleState extends State<Example>
+    with TickerProviderStateMixin, RestorationMixin, ShowAnimationsMixin {
   RestorableDuration _duration = RestorableDuration(const Duration(seconds: 5));
   AnimationController _animation;
   Color _color;
@@ -114,11 +116,9 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
   @override
   void restoreState(RestorationBucket oldBucket, bool initialRestore) {
     registerForRestoration(_duration, 'duration');
-    if (_firstTime)
-      _animation = AnimationController(vsync: this);
+    if (_firstTime) _animation = AnimationController(vsync: this);
     _animation.duration = _duration.value;
-    if (_firstTime)
-      _setupAnimation();
+    if (_firstTime) _setupAnimation();
     _firstTime = false;
   }
 
@@ -130,8 +130,7 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
     super.didUpdateWidget(oldWidget);
     oldWidget.color.removeListener(_colorChange);
     widget.color.addListener(_colorChange);
-    if (widget.active != oldWidget.active)
-      _setupAnimation();
+    if (widget.active != oldWidget.active) _setupAnimation();
   }
 
   double _height;
@@ -166,8 +165,7 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
   void _updateDuration(Duration newDuration) {
     _duration.value = newDuration;
     _animation.duration = _duration.value;
-    if (_animation.isAnimating)
-      _animation.repeat();
+    if (_animation.isAnimating) _animation.repeat();
   }
 
   void _colorChange() {
@@ -181,33 +179,35 @@ class _ExampleState extends State<Example> with TickerProviderStateMixin, Restor
     return Container(
       color: _color,
       padding: EdgeInsets.all(30.0),
-      child: ExpensiveWidget( // ideally this would not even rebuild when _color changes
+      child: ExpensiveWidget(
+        // ideally this would not even rebuild when _color changes
         child: ValueListenableBuilder(
-          valueListenable: _animation,
-          child: const ExpensiveWidget(child: const FlutterLogo()),
-          builder: (BuildContext context, double value, Widget child) {
-            return Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                child,
-                FlatButton(
-                  color: Colors.blue,
-                  child: Text('Change Duration', style: TextStyle(fontSize: 10.0 + value * _height)),
-                  onPressed: () {
-                    _updateDuration(Duration(seconds: _duration.value.inSeconds > 1 ? 1 : 5));
-                  },
-                ),
-              ],
-            );
-          }
-        ),
+            valueListenable: _animation,
+            child: const ExpensiveWidget(child: const FlutterLogo()),
+            builder: (BuildContext context, double value, Widget child) {
+              return Stack(
+                alignment: Alignment.center,
+                children: <Widget>[
+                  child,
+                  FlatButton(
+                    color: Colors.blue,
+                    child: Text('Change Duration',
+                        style: TextStyle(fontSize: 10.0 + value * _height)),
+                    onPressed: () {
+                      _updateDuration(Duration(
+                          seconds: _duration.value.inSeconds > 1 ? 1 : 5));
+                    },
+                  ),
+                ],
+              );
+            }),
       ),
     );
   }
 }
 
 class ExpensiveWidget extends StatelessWidget {
-  const ExpensiveWidget({ Key key, this.child }) : super(key: key);
+  const ExpensiveWidget({Key key, this.child}) : super(key: key);
 
   final Widget child;
 
@@ -219,71 +219,81 @@ class ExpensiveWidget extends StatelessWidget {
       decoration: ShapeDecoration(
         color: Colors.orange,
         shape: Border.all(
-            color: Colors.teal[500],
-            width: 8.0 + random.nextDouble() - 0.5,
-          ) + Border.all(
-            color: Colors.teal[700],
-            width: 8.0 + random.nextDouble() - 0.5,
-          ) + Border.all(
-            color: Colors.teal[900],
-            width: 8.0 + random.nextDouble() - 0.5,
-          ),
+              color: Colors.teal[500],
+              width: 8.0 + random.nextDouble() - 0.5,
+            ) +
+            Border.all(
+              color: Colors.teal[700],
+              width: 8.0 + random.nextDouble() - 0.5,
+            ) +
+            Border.all(
+              color: Colors.teal[900],
+              width: 8.0 + random.nextDouble() - 0.5,
+            ),
       ),
       child: Container(
         decoration: ShapeDecoration(
           color: Colors.teal,
           shape: Border.all(
-              color: Colors.teal[500],
-              width: 8.0 + random.nextDouble() - 0.5,
-            ) + Border.all(
-              color: Colors.teal[700],
-              width: 8.0 + random.nextDouble() - 0.5,
-            ) + Border.all(
-              color: Colors.teal[900],
-              width: 8.0 + random.nextDouble() - 0.5,
-            ),
+                color: Colors.teal[500],
+                width: 8.0 + random.nextDouble() - 0.5,
+              ) +
+              Border.all(
+                color: Colors.teal[700],
+                width: 8.0 + random.nextDouble() - 0.5,
+              ) +
+              Border.all(
+                color: Colors.teal[900],
+                width: 8.0 + random.nextDouble() - 0.5,
+              ),
         ),
         child: Container(
           decoration: ShapeDecoration(
             color: Colors.yellow,
             shape: Border.all(
-                color: Colors.teal[500],
-                width: 8.0 + random.nextDouble() - 0.5,
-              ) + Border.all(
-                color: Colors.teal[700],
-                width: 8.0 + random.nextDouble() - 0.5,
-              ) + Border.all(
-                color: Colors.teal[900],
-                width: 8.0 + random.nextDouble() - 0.5,
-              ),
+                  color: Colors.teal[500],
+                  width: 8.0 + random.nextDouble() - 0.5,
+                ) +
+                Border.all(
+                  color: Colors.teal[700],
+                  width: 8.0 + random.nextDouble() - 0.5,
+                ) +
+                Border.all(
+                  color: Colors.teal[900],
+                  width: 8.0 + random.nextDouble() - 0.5,
+                ),
           ),
           child: Container(
             decoration: ShapeDecoration(
               color: Colors.lime,
               shape: Border.all(
-                  color: Colors.teal[500],
-                  width: 8.0 + random.nextDouble() - 0.5,
-                ) + Border.all(
-                  color: Colors.teal[700],
-                  width: 8.0 + random.nextDouble() - 0.5,
-                ) + Border.all(
-                  color: Colors.teal[900],
-                  width: 8.0 + random.nextDouble() - 0.5,
-                ),
+                    color: Colors.teal[500],
+                    width: 8.0 + random.nextDouble() - 0.5,
+                  ) +
+                  Border.all(
+                    color: Colors.teal[700],
+                    width: 8.0 + random.nextDouble() - 0.5,
+                  ) +
+                  Border.all(
+                    color: Colors.teal[900],
+                    width: 8.0 + random.nextDouble() - 0.5,
+                  ),
             ),
             child: Container(
               decoration: ShapeDecoration(
                 color: Colors.white,
                 shape: Border.all(
-                    color: Colors.teal[500],
-                    width: 8.0 + random.nextDouble() - 0.5,
-                  ) + Border.all(
-                    color: Colors.teal[700],
-                    width: 8.0 + random.nextDouble() - 0.5,
-                  ) + Border.all(
-                    color: Colors.teal[900],
-                    width: 8.0 + random.nextDouble() - 0.5,
-                  ),
+                      color: Colors.teal[500],
+                      width: 8.0 + random.nextDouble() - 0.5,
+                    ) +
+                    Border.all(
+                      color: Colors.teal[700],
+                      width: 8.0 + random.nextDouble() - 0.5,
+                    ) +
+                    Border.all(
+                      color: Colors.teal[900],
+                      width: 8.0 + random.nextDouble() - 0.5,
+                    ),
               ),
               child: child,
             ),
@@ -304,8 +314,7 @@ class RestorableDuration extends RestorableValue<Duration> {
 
   @override
   void didUpdateValue(Duration oldValue) {
-    if (oldValue.inMicroseconds != value.inMicroseconds)
-      notifyListeners();
+    if (oldValue.inMicroseconds != value.inMicroseconds) notifyListeners();
   }
 
   @override
