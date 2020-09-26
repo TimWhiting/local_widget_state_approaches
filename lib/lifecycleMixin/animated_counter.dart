@@ -1,9 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:local_widget_state_approaches/lifecycleMixin/common.dart';
 
-import '../hooks/common.dart';
+import 'common.dart';
 
 final firstCounter = ValueNotifier(0);
 final secondCounter = ValueNotifier(0);
@@ -14,7 +13,17 @@ class LifeAnimatedCounter extends StatefulWidget {
 }
 
 class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
-    with LifeMixin {
+    with TickerProviderStateMixin, LifeMixin {
+  StateRef<int> counter1;
+  StateRef<int> counter2;
+
+  @override
+  void initState() {
+    super.initState();
+    counter1 = useFirstCounter(this);
+    counter2 = useSecondCounter(this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,35 +34,19 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            HookBuilder(
-              builder: (context) {
-                final value = useFirstCounter();
-                return Text('$value');
-              },
-            ),
+            Text('${get(counter1)}'),
             RaisedButton(
               onPressed: () => firstCounter.value += 100,
               child: Text('+'),
             ),
-            HookBuilder(
-              builder: (context) {
-                final value = useSecondCounter();
-                return Text('$value');
-              },
-            ),
+            Text('${get(counter2)}'),
             RaisedButton(
               onPressed: () => secondCounter.value += 100,
               child: Text('+'),
             ),
             const Text('total:'),
             // The total must take into account the animation of both counters
-            HookBuilder(
-              builder: (context) {
-                final value = useFirstCounter();
-                final value2 = useSecondCounter();
-                return Text('${value + value2}');
-              },
-            ),
+            Text('${get(counter1) + get(counter2)}'),
           ],
         ),
       ),
@@ -62,38 +55,83 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
 }
 
 extension Helpers on LifeMixin {
-  StateRef<int> useFirstCounter() {}
-  StateRef<int> useAnimInt(
-      StateRef<int> driver, Duration duration, Curve curve, String key) {
-    final state = useAnimController();
+  StateRef<int> useFirstCounter(TickerProvider ticker) {
+    return useAnimInt(
+      ticker,
+      initListenable(firstCounter, 'firstCounter'),
+      'firstCounterAnimation',
+      duration: const Duration(seconds: 5),
+      curve: Curves.easeOut,
+    );
   }
 
-  StateRef<AnimationController> controller(String key) {
-    final state = init(AnimationController, AnimationController(), key: key);
+  StateRef<int> useSecondCounter(TickerProvider ticker) {
+    return useAnimInt(
+      ticker,
+      initListenable(secondCounter, 'secondCounter'),
+      'secondCounterAnimation',
+      duration: const Duration(seconds: 2),
+      curve: Curves.easeInOut,
+    );
   }
 
-  StateRef<T> useListenable<T, L extends Listenable>(L<T> vl, String key) {
-    final state = init(T, vl.value, key: key);
+  StateRef<int> useAnimInt(TickerProvider ticker, StateRef<int> vl, String key,
+      {Duration duration, Curve curve}) {
+    final animation =
+        createAnimInt(ticker, vl, duration, curve, key + 'animation');
+    final animationValue = init(get(animation).value, key + 'value');
+    get(animation).addListener(() {
+      set(animationValue, get(animation).value);
+      print('here');
+    });
+    return animationValue;
+  }
+
+  StateRef<Animation<int>> createAnimInt(TickerProvider ticker,
+      StateRef<int> value, Duration duration, Curve curve, String key) {
+    final animationController = createAnimationController(
+        ticker, key + '_animationController',
+        duration: duration);
+
+    final animation = init(
+      AlwaysStoppedAnimation(get(value)),
+      key + '_animation',
+      update: (animation, _) {
+        final newAnimation = get(animationController).drive(
+          IntTween(begin: animation.value, end: get(value)).chain(
+            CurveTween(curve: curve),
+          ),
+        );
+        get(animationController).forward(from: 0);
+        return newAnimation;
+      },
+      rebuildOnChange: {value},
+      rebuild: (a) {
+        final oldValue = a as StateRef<int>;
+        final newAnimation = get(animationController).drive(
+          IntTween(begin: get(oldValue), end: get(value)).chain(
+            CurveTween(curve: curve),
+          ),
+        );
+        get(animationController).forward(from: 0);
+        return newAnimation;
+      },
+    );
+    return animation;
+  }
+
+  StateRef<AnimationController> createAnimationController(
+      TickerProvider ticker, String key,
+      {Duration duration}) {
+    return init(AnimationController(duration: duration, vsync: ticker), key);
+  }
+
+  StateRef<T> initListenable<T>(ValueListenable<T> vl, String key) {
+    final state = init(vl.value, key);
     vl.addListener(() {
       set(state, vl.value);
+      print('here');
     });
     return state;
   }
-}
-
-// Both animations voluntarily have a different Duration/Curve
-int useFirstCounter() {
-  return useAnimatedInt(
-    useValueListenable(firstCounter),
-    duration: const Duration(seconds: 5),
-    curve: Curves.easeOut,
-  );
-}
-
-int useSecondCounter() {
-  return useAnimatedInt(
-    useValueListenable(secondCounter),
-    duration: const Duration(seconds: 2),
-    curve: Curves.easeInOut,
-  );
 }

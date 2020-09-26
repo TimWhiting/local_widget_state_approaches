@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:local_widget_state_approaches/hooks/animated_counter.dart';
 import 'package:local_widget_state_approaches/hooks/animation.dart';
 import 'package:local_widget_state_approaches/hooks/multiple_animation_controller.dart';
+import 'package:local_widget_state_approaches/lifecycleMixin/animated_counter.dart';
 import 'package:local_widget_state_approaches/stateful/animated_counter.dart';
 import 'package:local_widget_state_approaches/stateful/multiple_animation_controller.dart';
 
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-enum Approach { hooks, stateful, lateProperty }
+enum Approach { hooks, stateful, lateProperty, lifecycleMixin }
 
 enum Examples {
   counter,
@@ -53,6 +54,9 @@ class HomePage extends HookWidget {
           case Approach.lateProperty:
             return Text(
                 'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+          case Approach.lifecycleMixin:
+            return Text('unavailable');
+            break;
         }
         break;
       case Examples.animatedCouter:
@@ -64,6 +68,9 @@ class HomePage extends HookWidget {
           case Approach.lateProperty:
             return Text(
                 'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+          case Approach.lifecycleMixin:
+            return LifeAnimatedCounter();
+            break;
         }
         break;
       case Examples.multipleAnimationController:
@@ -75,6 +82,9 @@ class HomePage extends HookWidget {
           case Approach.lateProperty:
             return Text(
                 'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+          case Approach.lifecycleMixin:
+            return Text('unavailable');
+            break;
         }
         break;
       case Examples.animation:
@@ -86,6 +96,9 @@ class HomePage extends HookWidget {
           case Approach.lateProperty:
             return Text(
                 'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
+          case Approach.lifecycleMixin:
+            return Text('unavailable');
+            break;
         }
         break;
     }

@@ -6,15 +6,14 @@ abstract class Disposable {
 
 class StateRef<T> {
   final String id;
-  final Type type;
-  StateRef(this.id, this.type);
+  StateRef(this.id);
 }
 
 mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   Map<StateRef, Object> _lifeStateEntries = {};
   Map<StateRef, dynamic Function(dynamic)> _lifeStateChanges = {};
   Map<StateRef, dynamic Function(dynamic, SW)> _lifeStateUpdates = {};
-  Map<StateRef, Function()> _rebuilders = {};
+  Map<StateRef, Function(StateRef)> _rebuilders = {};
   Map<StateRef, Set<StateRef>> _watchers = {};
 
   T get<T>(StateRef<T> ref) => _lifeStateEntries[ref] as T;
@@ -23,7 +22,7 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
       _lifeStateEntries[ref] = value;
       setState(() {});
       for (final watcher in _watchers[ref] ?? {}) {
-        _rebuilders[watcher]();
+        _rebuilders[watcher](ref);
       }
     }
   }
@@ -35,15 +34,14 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   }
 
   StateRef<T> init<T>(
-    Type type,
-    T something, {
-    String key,
+    T something,
+    String key, {
     T Function(dynamic old) change,
     T Function(dynamic old, SW oldWidget) update,
     Set<StateRef> rebuildOnChange,
-    T Function() rebuild,
+    T Function(StateRef) rebuild,
   }) {
-    final ref = StateRef<T>(key, type);
+    final ref = StateRef<T>(key);
     this._lifeStateEntries[ref] = something;
     if (change != null) {
       _lifeStateChanges[ref] = change;
