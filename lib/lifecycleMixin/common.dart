@@ -14,12 +14,17 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   Map<StateRef, Object> _lifeStateEntries = {};
   Map<StateRef, dynamic Function(dynamic)> _lifeStateChanges = {};
   Map<StateRef, dynamic Function(dynamic, SW)> _lifeStateUpdates = {};
+  Map<StateRef, Function()> _rebuilders = {};
+  Map<StateRef, Set<StateRef>> _watchers = {};
 
   T get<T>(StateRef<T> ref) => _lifeStateEntries[ref] as T;
   set<T>(StateRef<T> ref, T value) {
     if (value != _lifeStateEntries[ref]) {
       _lifeStateEntries[ref] = value;
       setState(() {});
+      for (final watcher in _watchers[ref] ?? {}) {
+        _rebuilders[watcher]();
+      }
     }
   }
 
@@ -35,6 +40,8 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     String key,
     T Function(dynamic old) change,
     T Function(dynamic old, SW oldWidget) update,
+    Set<StateRef> rebuildOnChange,
+    T Function() rebuild,
   }) {
     final ref = StateRef<T>(key, type);
     this._lifeStateEntries[ref] = something;
@@ -44,6 +51,17 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     if (update != null) {
       _lifeStateUpdates[ref] = update;
     }
+    if (rebuild != null) {
+      _rebuilders[ref] = rebuild;
+    }
+    if (rebuildOnChange != null) {
+      for (final stateRef in rebuildOnChange) {
+        if (_watchers[stateRef] == null) {
+          _watchers[stateRef] = {};
+        }
+        _watchers[stateRef].add(ref);
+      }
+    }
     return ref;
   }
 
@@ -52,8 +70,7 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     super.didChangeDependencies();
     for (final ref in _lifeStateEntries.keys) {
       if (_lifeStateChanges[ref] != null) {
-        final newValue = _lifeStateChanges[ref](_lifeStateEntries[ref]);
-        _lifeStateEntries[ref] = newValue;
+        set(ref, _lifeStateChanges[ref](_lifeStateEntries[ref]));
       }
     }
   }
@@ -63,9 +80,7 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     super.didUpdateWidget(oldWidget);
     for (final ref in _lifeStateEntries.keys) {
       if (_lifeStateUpdates[ref] != null) {
-        final newValue =
-            _lifeStateUpdates[ref](_lifeStateEntries[ref], oldWidget);
-        _lifeStateEntries[ref] = newValue;
+        set(ref, _lifeStateUpdates[ref](_lifeStateEntries[ref], oldWidget));
       }
     }
   }
