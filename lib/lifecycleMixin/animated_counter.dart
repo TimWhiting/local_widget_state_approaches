@@ -15,6 +15,7 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
     with LifeMixin {
   @override
   Widget build(BuildContext context) {
+    // print('Main Build');
     return Scaffold(
       appBar: AppBar(
         title: Text('Lifecycle mixin animated counter'),
@@ -25,8 +26,10 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
           children: [
             AnimatedLifecycleBuilder(builder: (context, lifeCycle) {
               final counter1Value = lifeCycle.useFirstCounter();
-              return (context, lifecycle) =>
-                  Text('${lifecycle.get(counter1Value)}');
+              return (context, lifecycle) {
+                // print('Counter 1 Build');
+                return Text('${lifecycle.get(counter1Value)}');
+              };
             }),
             RaisedButton(
               onPressed: () => firstCounter.value += 100,
@@ -34,8 +37,10 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
             ),
             AnimatedLifecycleBuilder(builder: (context, lifeCycle) {
               final counter2Value = lifeCycle.useSecondCounter();
-              return (context, lifecycle) =>
-                  Text('${lifecycle.get(counter2Value)}');
+              return (context, lifecycle) {
+                // print('Counter 2 Build');
+                return Text('${lifecycle.get(counter2Value)}');
+              };
             }),
             RaisedButton(
               onPressed: () => secondCounter.value += 100,
@@ -46,8 +51,11 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
             AnimatedLifecycleBuilder(builder: (context, lifeCycle) {
               final counter1Value = lifeCycle.useFirstCounter();
               final counter2Value = lifeCycle.useSecondCounter();
-              return (context, lifecycle) => Text(
-                  '${lifecycle.get(counter1Value) + lifecycle.get(counter2Value)}');
+              return (context, lifecycle) {
+                // print('Counter 1+2 Build');
+                return Text(
+                    '${lifecycle.get(counter1Value) + lifecycle.get(counter2Value)}');
+              };
             }),
           ],
         ),
