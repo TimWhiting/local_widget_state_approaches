@@ -1,12 +1,11 @@
 import 'package:flutter/widgets.dart';
 
 class StateRef<T, SW extends StatefulWidget> {
-  final int id;
   Function(T) _onDispose;
   T Function(T, SW) _onUpdate;
   T Function(T) _onChange;
   List<void Function(T)> _watchers = [];
-  StateRef(this.id);
+  StateRef();
 }
 
 extension StateRefX<T, SW extends StatefulWidget> on StateRef<T, SW> {
@@ -29,7 +28,6 @@ extension StateRefX<T, SW extends StatefulWidget> on StateRef<T, SW> {
 
 mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   Map<StateRef<Object, SW>, Object> _lifeStateEntries = {};
-  static int _lastAssignedID = -1;
 
   T get<T, SW2 extends StatefulWidget>(StateRef<T, SW2> ref) =>
       _lifeStateEntries[ref] as T;
@@ -49,7 +47,7 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   }
 
   StateRef<T, SW> init<T>(T something) {
-    final ref = StateRef<T, SW>(_lastAssignedID++);
+    final ref = StateRef<T, SW>();
     this._lifeStateEntries[ref] = something;
     return ref;
   }
