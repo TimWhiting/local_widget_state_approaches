@@ -84,6 +84,7 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     super.dispose();
   }
 }
+
 typedef BuildFunction = Widget Function(BuildContext, LifeMixin);
 typedef LifeCycleFunction = BuildFunction Function(BuildContext, LifeMixin);
 
