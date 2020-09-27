@@ -1,8 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:local_widget_state_approaches/lifecycleMixin/common.dart';
-
 import 'common.dart';
+import 'framework.dart';
 
 final firstCounter = ValueNotifier(0);
 final secondCounter = ValueNotifier(0);
@@ -13,40 +12,43 @@ class LifeAnimatedCounter extends StatefulWidget {
 }
 
 class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
-    with TickerProviderStateMixin, LifeMixin {
-  StateRef<int> counter1;
-  StateRef<int> counter2;
-
-  @override
-  void initState() {
-    super.initState();
-    counter1 = useFirstCounter(this);
-    counter2 = useSecondCounter(this);
-  }
-
+    with LifeMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Hook animated counter'),
+        title: Text('Lifecycle mixin animated counter'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('${get(counter1)}'),
+            AnimatedLifecycleBuilder(builder: (context, lifeCycle) {
+              final counter1Value = lifeCycle.useFirstCounter();
+              return (context, lifecycle) =>
+                  Text('${lifecycle.get(counter1Value)}');
+            }),
             RaisedButton(
               onPressed: () => firstCounter.value += 100,
               child: Text('+'),
             ),
-            Text('${get(counter2)}'),
+            AnimatedLifecycleBuilder(builder: (context, lifeCycle) {
+              final counter2Value = lifeCycle.useSecondCounter();
+              return (context, lifecycle) =>
+                  Text('${lifecycle.get(counter2Value)}');
+            }),
             RaisedButton(
               onPressed: () => secondCounter.value += 100,
               child: Text('+'),
             ),
             const Text('total:'),
             // The total must take into account the animation of both counters
-            Text('${get(counter1) + get(counter2)}'),
+            AnimatedLifecycleBuilder(builder: (context, lifeCycle) {
+              final counter1Value = lifeCycle.useFirstCounter();
+              final counter2Value = lifeCycle.useSecondCounter();
+              return (context, lifecycle) => Text(
+                  '${lifecycle.get(counter1Value) + lifecycle.get(counter2Value)}');
+            }),
           ],
         ),
       ),
@@ -54,9 +56,25 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
   }
 }
 
+extension AnimatedLifeBuilderHelpers on AnimatedLifecycleBuilderState {
+  StateRef<int> useFirstCounter() => Helpers(this).useFirstCounter(this);
+
+  StateRef<int> useSecondCounter() => Helpers(this).useSecondCounter(this);
+}
+
 extension Helpers on LifeMixin {
   StateRef<int> useFirstCounter(TickerProvider ticker) {
-    return useAnimInt(
+    final animation = createFirstCounter(ticker);
+    return useAnimInt(animation, 'firstAnimValue');
+  }
+
+  StateRef<int> useSecondCounter(TickerProvider ticker) {
+    final animation = createSecondCounter(ticker);
+    return useAnimInt(animation, 'secondAnimValue');
+  }
+
+  StateRef<Animation<int>> createFirstCounter(TickerProvider ticker) {
+    return createAnimInt(
       ticker,
       initListenable(firstCounter, 'firstCounter'),
       'firstCounterAnimation',
@@ -65,76 +83,13 @@ extension Helpers on LifeMixin {
     );
   }
 
-  StateRef<int> useSecondCounter(TickerProvider ticker) {
-    return useAnimInt(
+  StateRef<Animation<int>> createSecondCounter(TickerProvider ticker) {
+    return createAnimInt(
       ticker,
       initListenable(secondCounter, 'secondCounter'),
       'secondCounterAnimation',
       duration: const Duration(seconds: 2),
       curve: Curves.easeInOut,
     );
-  }
-
-  StateRef<int> useAnimInt(TickerProvider ticker, StateRef<int> vl, String key,
-      {Duration duration, Curve curve}) {
-    final animation =
-        createAnimInt(ticker, vl, duration, curve, key + 'animation');
-    final animationValue = init(
-      get(animation).value,
-      key + 'value',
-    );
-    watch(animation, (newAnimation) {
-      newAnimation.addListener(() {
-        set(animationValue, get(animation).value);
-      });
-    });
-
-    return animationValue;
-  }
-
-  StateRef<Animation<int>> createAnimInt(TickerProvider ticker,
-      StateRef<int> value, Duration duration, Curve curve, String key) {
-    final animationController = createAnimationController(
-        ticker, key + '_animationController',
-        duration: duration);
-
-    final animation = init(
-      AlwaysStoppedAnimation(get(value)),
-      key + '_animation',
-      update: (animation, _) {
-        final newAnimation = get(animationController).drive(
-          IntTween(begin: animation.value, end: get(value)).chain(
-            CurveTween(curve: curve),
-          ),
-        );
-        get(animationController).forward(from: 0);
-        return newAnimation;
-      },
-      rebuildOnChange: {value},
-      rebuild: (oldValue) {
-        final newAnimation = get(animationController).drive(
-          IntTween(begin: oldValue.value, end: get(value)).chain(
-            CurveTween(curve: curve),
-          ),
-        );
-        get(animationController).forward(from: 0);
-        return newAnimation;
-      },
-    );
-    return animation;
-  }
-
-  StateRef<AnimationController> createAnimationController(
-      TickerProvider ticker, String key,
-      {Duration duration}) {
-    return init(AnimationController(duration: duration, vsync: ticker), key);
-  }
-
-  StateRef<T> initListenable<T>(ValueListenable<T> vl, String key) {
-    final state = init(vl.value, key);
-    vl.addListener(() {
-      set(state, vl.value);
-    });
-    return state;
   }
 }

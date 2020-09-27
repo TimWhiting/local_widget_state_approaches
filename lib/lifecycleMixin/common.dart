@@ -1,108 +1,74 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-abstract class Disposable {
-  void dispose();
-}
+import 'framework.dart';
 
-class StateRef<T> {
-  final String id;
-  StateRef(this.id);
-}
-
-mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
-  Map<StateRef, Object> _lifeStateEntries = {};
-  Map<StateRef, dynamic Function(dynamic)> _lifeStateChanges = {};
-  Map<StateRef, dynamic Function(dynamic, SW)> _lifeStateUpdates = {};
-  Map<StateRef, Function(Object)> _rebuilders = {};
-  Map<StateRef, Set<StateRef>> _stateWatchers = {};
-  Map<StateRef<Object>, List<Function(Object)>> _watchers = {};
-
-  T get<T>(StateRef<T> ref) => _lifeStateEntries[ref] as T;
-  set<T>(StateRef<T> ref, T value) {
-    if (value != _lifeStateEntries[ref]) {
-      _lifeStateEntries[ref] = value;
-      setState(() {});
-      for (final watcher in _stateWatchers[ref] ?? {}) {
-        set(watcher, _rebuilders[watcher](get(watcher)));
-      }
-      for (final watcher in _watchers[ref] ?? []) {
-        watcher(get(ref));
-      }
-    }
+extension CommonHelpers on LifeMixin {
+  StateRef<int> useAnimInt(StateRef<Animation<int>> animation, String key) {
+    final animationValue = init(get(animation).value, key + 'value');
+    watch<Animation<int>>(animation, (newAnimation) {
+      print('here');
+      newAnimation.addListener(() {
+        set(animationValue, get(animation).value);
+      });
+    });
+    return animationValue;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    print('initState from StateMixin');
-  }
-
-  watch<T>(StateRef<T> ref, Function(T) watch) {
-    if (_watchers[ref] == null) {
-      _watchers[ref] = [];
-    }
-    _watchers[ref].add(watch);
-  }
-
-  StateRef<T> init<T>(
-    T something,
+  StateRef<Animation<int>> createAnimInt(
+    TickerProvider ticker,
+    StateRef<int> value,
     String key, {
-    T Function(dynamic old) change,
-    T Function(dynamic old, SW oldWidget) update,
-    Set<StateRef> rebuildOnChange,
-    T Function(dynamic) rebuild,
+    Duration duration,
+    Curve curve,
   }) {
-    final ref = StateRef<T>(key);
-    this._lifeStateEntries[ref] = something;
-    if (change != null) {
-      _lifeStateChanges[ref] = change;
-    }
-    if (update != null) {
-      _lifeStateUpdates[ref] = update;
-    }
-    if (rebuild != null) {
-      _rebuilders[ref] = rebuild;
-    }
-    if (rebuildOnChange != null) {
-      for (final stateRef in rebuildOnChange) {
-        if (_stateWatchers[stateRef] == null) {
-          _stateWatchers[stateRef] = {};
-        }
-        _stateWatchers[stateRef].add(ref);
-      }
-    }
-    return ref;
+    final animationController = createAnimationController(
+        ticker, key + '_animationController',
+        duration: duration);
+
+    final animation = init(
+      AlwaysStoppedAnimation(get(value)),
+      key + '_animation',
+    );
+
+    onDidUpdateWidget(animation, (animation, _) {
+      final newAnimation = get(animationController).drive(
+        IntTween(begin: animation.value, end: get(value)).chain(
+          CurveTween(curve: curve),
+        ),
+      );
+      get(animationController).forward(from: 0);
+      return newAnimation;
+    });
+
+    watch(value, (_) {
+      final newAnimation = get(animationController).drive(
+        IntTween(begin: get(animation).value, end: get(value)).chain(
+          CurveTween(curve: curve),
+        ),
+      );
+      get(animationController).forward(from: 0);
+      set(animation, newAnimation);
+    });
+
+    return animation;
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    for (final ref in _lifeStateEntries.keys) {
-      if (_lifeStateChanges[ref] != null) {
-        set(ref, _lifeStateChanges[ref](_lifeStateEntries[ref]));
-      }
-    }
+  StateRef<AnimationController> createAnimationController(
+      TickerProvider ticker, String key,
+      {Duration duration}) {
+    final animationController =
+        init(AnimationController(duration: duration, vsync: ticker), key);
+    onDispose<AnimationController>(
+        animationController, (controller) => controller.dispose());
+    return animationController;
   }
 
-  @override
-  void didUpdateWidget(covariant SW oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    for (final ref in _lifeStateEntries.keys) {
-      if (_lifeStateUpdates[ref] != null) {
-        set(ref, _lifeStateUpdates[ref](_lifeStateEntries[ref], oldWidget));
-      }
-    }
-  }
-
-  @override
-  dispose() {
-    print('dispose from StateMixin');
-    for (final entry in _lifeStateEntries.values) {
-      if (entry is Disposable) {
-        entry.dispose();
-        print('Disposing $entry');
-      }
-    }
-    super.dispose();
+  StateRef<T> initListenable<T>(ValueListenable<T> vl, String key) {
+    final state = init(vl.value, key);
+    vl.addListener(() {
+      set(state, vl.value);
+    });
+    return state;
   }
 }
