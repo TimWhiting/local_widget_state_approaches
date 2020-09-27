@@ -76,21 +76,20 @@ extension Helpers on LifeMixin {
   StateRef<int, SW> useFirstCounter<SW extends StatefulWidget>(
       TickerProvider ticker) {
     final animation = createFirstCounter(ticker);
-    return useAnimInt(animation, 'firstAnimValue');
+    return useAnimInt(animation);
   }
 
   StateRef<int, SW> useSecondCounter<SW extends StatefulWidget>(
       TickerProvider ticker) {
     final animation = createSecondCounter(ticker);
-    return useAnimInt(animation, 'secondAnimValue');
+    return useAnimInt(animation);
   }
 
   StateRef<Animation<int>, SW> createFirstCounter<SW extends StatefulWidget>(
       TickerProvider ticker) {
     return createAnimInt(
       ticker,
-      initListenable(firstCounter, 'firstCounter'),
-      'firstCounterAnimation',
+      initListenable(firstCounter),
       duration: const Duration(seconds: 5),
       curve: Curves.easeOut,
     );
@@ -100,8 +99,7 @@ extension Helpers on LifeMixin {
       TickerProvider ticker) {
     return createAnimInt(
       ticker,
-      initListenable(secondCounter, 'secondCounter'),
-      'secondCounterAnimation',
+      initListenable(secondCounter),
       duration: const Duration(seconds: 2),
       curve: Curves.easeInOut,
     );

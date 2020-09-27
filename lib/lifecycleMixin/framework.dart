@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 class StateRef<T, SW extends StatefulWidget> {
-  final String id;
+  final int id;
   Function(T) _onDispose;
   T Function(T, SW) _onUpdate;
   T Function(T) _onChange;
@@ -28,7 +28,8 @@ extension StateRefX<T, SW extends StatefulWidget> on StateRef<T, SW> {
 }
 
 mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
-  Map<StateRef, Object> _lifeStateEntries = {};
+  Map<StateRef<Object, SW>, Object> _lifeStateEntries = {};
+  static int _lastAssignedID = -1;
 
   T get<T, SW2 extends StatefulWidget>(StateRef<T, SW2> ref) =>
       _lifeStateEntries[ref] as T;
@@ -47,8 +48,8 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     super.initState();
   }
 
-  StateRef<T, SW> init<T>(T something, String key) {
-    final ref = StateRef<T, SW>(key);
+  StateRef<T, SW> init<T>(T something) {
+    final ref = StateRef<T, SW>(_lastAssignedID++);
     this._lifeStateEntries[ref] = something;
     return ref;
   }
@@ -77,7 +78,8 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   void dispose() {
     for (final entry in _lifeStateEntries.entries) {
       if (entry.key?._onDispose != null) {
-        entry.key._onDispose(entry.value);
+        final disposer = entry.key._onDispose;
+        disposer(entry.value);
       }
     }
     _lifeStateEntries = {};

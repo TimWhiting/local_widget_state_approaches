@@ -5,8 +5,8 @@ import 'framework.dart';
 
 extension CommonHelpers on LifeMixin {
   StateRef<int, SW> useAnimInt<SW extends StatefulWidget>(
-      StateRef<Animation<int>, SW> animation, String key) {
-    final animationValue = init(get(animation).value, key + 'value');
+      StateRef<Animation<int>, SW> animation) {
+    final animationValue = init(get(animation).value);
     animation.watch((newAnimation) {
       newAnimation.addListener(() {
         set(animationValue, get(animation).value);
@@ -17,18 +17,15 @@ extension CommonHelpers on LifeMixin {
 
   StateRef<Animation<int>, SW> createAnimInt<SW extends StatefulWidget>(
     TickerProvider ticker,
-    StateRef<int, SW> value,
-    String key, {
+    StateRef<int, SW> value, {
     Duration duration,
     Curve curve,
   }) {
-    final animationController = createAnimationController(
-        ticker, key + '_animationController',
-        duration: duration);
+    final animationController =
+        createAnimationController(ticker, duration: duration);
 
     final animation = init<Animation<int>>(
       AlwaysStoppedAnimation(get(value)),
-      key + '_animation',
     );
 
     animation.onDidUpdateWidget((animation, _) {
@@ -56,17 +53,17 @@ extension CommonHelpers on LifeMixin {
 
   StateRef<AnimationController, SW>
       createAnimationController<SW extends StatefulWidget>(
-          TickerProvider ticker, String key,
+          TickerProvider ticker,
           {Duration duration}) {
     final animationController =
-        init(AnimationController(duration: duration, vsync: ticker), key);
+        init(AnimationController(duration: duration, vsync: ticker));
     animationController.onDispose((controller) => controller.dispose());
     return animationController;
   }
 
   StateRef<T, SW> initListenable<T, SW extends StatefulWidget>(
-      ValueListenable<T> vl, String key) {
-    final state = init(vl.value, key);
+      ValueListenable<T> vl) {
+    final state = init(vl.value);
     vl.addListener(() {
       set(state, vl.value);
     });

@@ -18,7 +18,7 @@ class _LifeCounterState extends State<LifeCounter> with LifeMixin {
   @override
   void initState() {
     super.initState();
-    counter = init(0, 'counter');
+    counter = init(0);
   }
 
   @override
