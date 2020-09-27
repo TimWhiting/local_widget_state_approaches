@@ -13,16 +13,20 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   Map<StateRef, Object> _lifeStateEntries = {};
   Map<StateRef, dynamic Function(dynamic)> _lifeStateChanges = {};
   Map<StateRef, dynamic Function(dynamic, SW)> _lifeStateUpdates = {};
-  Map<StateRef, Function(StateRef)> _rebuilders = {};
-  Map<StateRef, Set<StateRef>> _watchers = {};
+  Map<StateRef, Function(Object)> _rebuilders = {};
+  Map<StateRef, Set<StateRef>> _stateWatchers = {};
+  Map<StateRef<Object>, List<Function(Object)>> _watchers = {};
 
   T get<T>(StateRef<T> ref) => _lifeStateEntries[ref] as T;
   set<T>(StateRef<T> ref, T value) {
     if (value != _lifeStateEntries[ref]) {
       _lifeStateEntries[ref] = value;
       setState(() {});
-      for (final watcher in _watchers[ref] ?? {}) {
-        _rebuilders[watcher](ref);
+      for (final watcher in _stateWatchers[ref] ?? {}) {
+        set(watcher, _rebuilders[watcher](get(watcher)));
+      }
+      for (final watcher in _watchers[ref] ?? []) {
+        watcher(get(ref));
       }
     }
   }
@@ -33,13 +37,20 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     print('initState from StateMixin');
   }
 
+  watch<T>(StateRef<T> ref, Function(T) watch) {
+    if (_watchers[ref] == null) {
+      _watchers[ref] = [];
+    }
+    _watchers[ref].add(watch);
+  }
+
   StateRef<T> init<T>(
     T something,
     String key, {
     T Function(dynamic old) change,
     T Function(dynamic old, SW oldWidget) update,
     Set<StateRef> rebuildOnChange,
-    T Function(StateRef) rebuild,
+    T Function(dynamic) rebuild,
   }) {
     final ref = StateRef<T>(key);
     this._lifeStateEntries[ref] = something;
@@ -54,10 +65,10 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     }
     if (rebuildOnChange != null) {
       for (final stateRef in rebuildOnChange) {
-        if (_watchers[stateRef] == null) {
-          _watchers[stateRef] = {};
+        if (_stateWatchers[stateRef] == null) {
+          _stateWatchers[stateRef] = {};
         }
-        _watchers[stateRef].add(ref);
+        _stateWatchers[stateRef].add(ref);
       }
     }
     return ref;

@@ -79,11 +79,16 @@ extension Helpers on LifeMixin {
       {Duration duration, Curve curve}) {
     final animation =
         createAnimInt(ticker, vl, duration, curve, key + 'animation');
-    final animationValue = init(get(animation).value, key + 'value');
-    get(animation).addListener(() {
-      set(animationValue, get(animation).value);
-      print('here');
+    final animationValue = init(
+      get(animation).value,
+      key + 'value',
+    );
+    watch(animation, (newAnimation) {
+      newAnimation.addListener(() {
+        set(animationValue, get(animation).value);
+      });
     });
+
     return animationValue;
   }
 
@@ -106,10 +111,9 @@ extension Helpers on LifeMixin {
         return newAnimation;
       },
       rebuildOnChange: {value},
-      rebuild: (a) {
-        final oldValue = a as StateRef<int>;
+      rebuild: (oldValue) {
         final newAnimation = get(animationController).drive(
-          IntTween(begin: get(oldValue), end: get(value)).chain(
+          IntTween(begin: oldValue.value, end: get(value)).chain(
             CurveTween(curve: curve),
           ),
         );
@@ -130,7 +134,6 @@ extension Helpers on LifeMixin {
     final state = init(vl.value, key);
     vl.addListener(() {
       set(state, vl.value);
-      print('here');
     });
     return state;
   }
