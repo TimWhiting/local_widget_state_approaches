@@ -1,44 +1,43 @@
 import 'package:flutter/widgets.dart';
 
-class StateRef<T> {
+class StateRef<T, SW extends StatefulWidget> {
   final String id;
+  Function(T) _onDispose;
+  T Function(T, SW) _onUpdate;
+  T Function(T) _onChange;
+  List<void Function(T)> _watchers = [];
   StateRef(this.id);
 }
 
-class Disposer<T> {
-  final Function(T) onDispose;
-  Disposer(this.onDispose);
-}
+extension StateRefX<T, SW extends StatefulWidget> on StateRef<T, SW> {
+  void watch(void Function(T) watch) {
+    _watchers.add(watch);
+  }
 
-class WidgetUpdate<T, SW extends StatefulWidget> {
-  final T Function(T, SW) onUpdate;
-  WidgetUpdate(this.onUpdate);
-}
+  void onDidUpdateWidget(T Function(T oldValue, SW oldWidget) update) {
+    _onUpdate = update;
+  }
 
-class DependenciesUpdate<T> {
-  final T Function(T) onChange;
-  DependenciesUpdate(this.onChange);
-}
+  void onDidChangeDependencies(T Function(T old) change) {
+    _onChange = change;
+  }
 
-class Watcher<T> {
-  final Function(T) onWatchUpdate;
-  Watcher(this.onWatchUpdate);
+  void onDispose(Function(T) dispose) {
+    _onDispose = dispose;
+  }
 }
 
 mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   Map<StateRef, Object> _lifeStateEntries = {};
-  Map<StateRef, DependenciesUpdate> _lifeStateChanges = {};
-  Map<StateRef, WidgetUpdate> _lifeStateUpdates = {};
-  Map<StateRef, List<Watcher>> _watchers = {};
-  Map<StateRef, Disposer> _disposers = {};
 
-  T get<T>(StateRef<T> ref) => _lifeStateEntries[ref] as T;
-  set<T>(StateRef<T> ref, T value) {
+  T get<T, SW2 extends StatefulWidget>(StateRef<T, SW2> ref) =>
+      _lifeStateEntries[ref] as T;
+  set<T>(StateRef<T, SW> ref, T value) {
     if (value != _lifeStateEntries[ref]) {
       _lifeStateEntries[ref] = value;
       setState(() {});
-      for (final watcher in _watchers[ref] ?? []) {
-        watcher.onWatchUpdate(get(ref));
+      for (final watcher in ref._watchers) {
+        watcher?.call(value);
       }
     }
   }
@@ -48,34 +47,8 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
     super.initState();
   }
 
-  void watch<T>(StateRef<T> ref, Function(T) watch) {
-    if (_watchers[ref] == null) {
-      _watchers[ref] = [];
-    }
-    _watchers[ref].add(Watcher<T>(watch));
-  }
-
-  void onDidUpdateWidget<T>(
-      StateRef<T> ref, T Function(T oldValue, SW oldWidget) update) {
-    if (update != null) {
-      _lifeStateUpdates[ref] = WidgetUpdate<T, SW>(update);
-    }
-  }
-
-  void onDidChangeDependencies<T>(StateRef<T> ref, T Function(T old) change) {
-    if (change != null) {
-      _lifeStateChanges[ref] = DependenciesUpdate<T>(change);
-    }
-  }
-
-  void onDispose<T>(StateRef<T> ref, Function(T) dispose) {
-    if (dispose != null) {
-      _disposers[ref] = Disposer<T>(dispose);
-    }
-  }
-
-  StateRef<T> init<T>(T something, String key) {
-    final ref = StateRef<T>(key);
+  StateRef<T, SW> init<T>(T something, String key) {
+    final ref = StateRef<T, SW>(key);
     this._lifeStateEntries[ref] = something;
     return ref;
   }
@@ -84,8 +57,8 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     for (final ref in _lifeStateEntries.keys) {
-      if (_lifeStateChanges[ref] != null) {
-        set(ref, _lifeStateChanges[ref].onChange(_lifeStateEntries[ref]));
+      if (ref?._onChange != null) {
+        set(ref, ref._onChange(_lifeStateEntries[ref]));
       }
     }
   }
@@ -94,23 +67,20 @@ mixin LifeMixin<SW extends StatefulWidget> on State<SW> {
   void didUpdateWidget(covariant SW oldWidget) {
     super.didUpdateWidget(oldWidget);
     for (final ref in _lifeStateEntries.keys) {
-      if (_lifeStateUpdates[ref] != null) {
-        set(ref,
-            _lifeStateUpdates[ref].onUpdate(_lifeStateEntries[ref], oldWidget));
+      if (ref?._onUpdate != null) {
+        set(ref, ref._onUpdate(_lifeStateEntries[ref], oldWidget));
       }
     }
   }
 
   @override
   void dispose() {
-    for (final entry in _disposers.entries) {
-      entry.value.onDispose(get(entry.key));
+    for (final entry in _lifeStateEntries.entries) {
+      if (entry.key?._onDispose != null) {
+        entry.key._onDispose(entry.value);
+      }
     }
     _lifeStateEntries = {};
-    _lifeStateChanges = {};
-    _lifeStateUpdates = {};
-    _watchers = {};
-    _disposers = {};
     super.dispose();
   }
 }

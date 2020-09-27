@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'framework.dart';
 
 extension CommonHelpers on LifeMixin {
-  StateRef<int> useAnimInt(StateRef<Animation<int>> animation, String key) {
+  StateRef<int, SW> useAnimInt<SW extends StatefulWidget>(
+      StateRef<Animation<int>, SW> animation, String key) {
     final animationValue = init(get(animation).value, key + 'value');
-    watch<Animation<int>>(animation, (newAnimation) {
-      print('here');
+    animation.watch((newAnimation) {
       newAnimation.addListener(() {
         set(animationValue, get(animation).value);
       });
@@ -15,9 +15,9 @@ extension CommonHelpers on LifeMixin {
     return animationValue;
   }
 
-  StateRef<Animation<int>> createAnimInt(
+  StateRef<Animation<int>, SW> createAnimInt<SW extends StatefulWidget>(
     TickerProvider ticker,
-    StateRef<int> value,
+    StateRef<int, SW> value,
     String key, {
     Duration duration,
     Curve curve,
@@ -26,12 +26,12 @@ extension CommonHelpers on LifeMixin {
         ticker, key + '_animationController',
         duration: duration);
 
-    final animation = init(
+    final animation = init<Animation<int>>(
       AlwaysStoppedAnimation(get(value)),
       key + '_animation',
     );
 
-    onDidUpdateWidget(animation, (animation, _) {
+    animation.onDidUpdateWidget((animation, _) {
       final newAnimation = get(animationController).drive(
         IntTween(begin: animation.value, end: get(value)).chain(
           CurveTween(curve: curve),
@@ -41,7 +41,7 @@ extension CommonHelpers on LifeMixin {
       return newAnimation;
     });
 
-    watch(value, (_) {
+    value.watch((_) {
       final newAnimation = get(animationController).drive(
         IntTween(begin: get(animation).value, end: get(value)).chain(
           CurveTween(curve: curve),
@@ -54,17 +54,18 @@ extension CommonHelpers on LifeMixin {
     return animation;
   }
 
-  StateRef<AnimationController> createAnimationController(
-      TickerProvider ticker, String key,
-      {Duration duration}) {
+  StateRef<AnimationController, SW>
+      createAnimationController<SW extends StatefulWidget>(
+          TickerProvider ticker, String key,
+          {Duration duration}) {
     final animationController =
         init(AnimationController(duration: duration, vsync: ticker), key);
-    onDispose<AnimationController>(
-        animationController, (controller) => controller.dispose());
+    animationController.onDispose((controller) => controller.dispose());
     return animationController;
   }
 
-  StateRef<T> initListenable<T>(ValueListenable<T> vl, String key) {
+  StateRef<T, SW> initListenable<T, SW extends StatefulWidget>(
+      ValueListenable<T> vl, String key) {
     final state = init(vl.value, key);
     vl.addListener(() {
       set(state, vl.value);

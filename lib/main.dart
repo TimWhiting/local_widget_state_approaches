@@ -10,6 +10,7 @@ import 'package:local_widget_state_approaches/stateful/multiple_animation_contro
 
 import 'hooks/counter.dart' show CounterHooks;
 // import 'lateProperty/counter.dart' show LatePropertyCounter; // empty
+import 'lifecycleMixin/counter.dart';
 import 'stateful/counter.dart' show StatefulCounter;
 
 import 'stateful/animation.dart' show StatefulAnimation;
@@ -55,7 +56,7 @@ class HomePage extends HookWidget {
             return Text(
                 'unavailable'); // LatePropertyCounter(title: 'Late Property Counter');
           case Approach.lifecycleMixin:
-            return Text('unavailable');
+            return LifeCounter('LifeCycle Counter');
             break;
         }
         break;

@@ -57,23 +57,28 @@ class _LifeAnimatedCounterState extends State<LifeAnimatedCounter>
 }
 
 extension AnimatedLifeBuilderHelpers on AnimatedLifecycleBuilderState {
-  StateRef<int> useFirstCounter() => Helpers(this).useFirstCounter(this);
+  StateRef<int, SW> useFirstCounter<SW extends StatefulWidget>() =>
+      Helpers(this).useFirstCounter(this);
 
-  StateRef<int> useSecondCounter() => Helpers(this).useSecondCounter(this);
+  StateRef<int, SW> useSecondCounter<SW extends StatefulWidget>() =>
+      Helpers(this).useSecondCounter(this);
 }
 
 extension Helpers on LifeMixin {
-  StateRef<int> useFirstCounter(TickerProvider ticker) {
+  StateRef<int, SW> useFirstCounter<SW extends StatefulWidget>(
+      TickerProvider ticker) {
     final animation = createFirstCounter(ticker);
     return useAnimInt(animation, 'firstAnimValue');
   }
 
-  StateRef<int> useSecondCounter(TickerProvider ticker) {
+  StateRef<int, SW> useSecondCounter<SW extends StatefulWidget>(
+      TickerProvider ticker) {
     final animation = createSecondCounter(ticker);
     return useAnimInt(animation, 'secondAnimValue');
   }
 
-  StateRef<Animation<int>> createFirstCounter(TickerProvider ticker) {
+  StateRef<Animation<int>, SW> createFirstCounter<SW extends StatefulWidget>(
+      TickerProvider ticker) {
     return createAnimInt(
       ticker,
       initListenable(firstCounter, 'firstCounter'),
@@ -83,7 +88,8 @@ extension Helpers on LifeMixin {
     );
   }
 
-  StateRef<Animation<int>> createSecondCounter(TickerProvider ticker) {
+  StateRef<Animation<int>, SW> createSecondCounter<SW extends StatefulWidget>(
+      TickerProvider ticker) {
     return createAnimInt(
       ticker,
       initListenable(secondCounter, 'secondCounter'),
